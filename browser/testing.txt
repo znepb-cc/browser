@@ -1,0 +1,82 @@
+{
+  {
+    classes = {},
+    name = "div",
+    nodes = {
+      {
+        name = "",
+        content = "\
+    <h",
+      },
+      {
+        classes = {},
+        name = "h1",
+        content = "Example Domain",
+        attributes = {},
+      },
+      {
+        name = "",
+        content = "   <p>This domain is for use in illustrative examples in documents. You may use this\
+    domain in literature without prior coordination or asking for permission.</p>\
+    <p><a href=\"https://www.iana.org/domains/example\">More information...</a></p>\
+",
+      },
+      {
+        name = "",
+        content = "\
+    <h1>Example Domain</h1>\
+    <p",
+      },
+      {
+        classes = {},
+        name = "p",
+        content = "This domain is for use in illustrative examples in documents. You may use this\
+    domain in literature without prior coordination or asking for permission.",
+        attributes = {},
+      },
+      {
+        name = "",
+        content = "   <p><a href=\"https://www.iana.org/domains/example\">More information...</a></p>\
+",
+      },
+      {
+        name = "",
+        content = "\
+    <h1>Example Domain</h1>\
+    <p>This domain is for use in illustrative examples in documents. You may use this\
+    domain in literature without prior coordination or asking for permission.</p>\
+    <p",
+      },
+      {
+        classes = {},
+        name = "p",
+        nodes = {
+          {
+            name = "",
+            content = "",
+          },
+          {
+            classes = {},
+            name = "a",
+            content = "More information...",
+            attributes = {
+              href = "https://www.iana.org/domains/example",
+            },
+          },
+          {
+            name = "",
+            content = "",
+          },
+        },
+        attributes = {},
+      },
+      {
+        name = "",
+        content = "",
+      },
+    },
+    attributes = {},
+  },
+}
+
+this is what cc sees
