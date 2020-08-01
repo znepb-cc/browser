@@ -88,6 +88,7 @@ local jsWindow = {
           change content
               -> soft reload
       ]]
+    end
   },
   pageRoot = _G.pageRoot
 }

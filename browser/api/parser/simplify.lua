@@ -79,15 +79,17 @@ local function parseRoot(root)
         table.insert(content, data)
     end
     local title, luaIncludes, styles = nil, {}, {}
-    for i, v in pairs(root("head")[1].nodes) do
-        if v.name == "title" then
-            title = v:getcontent()
-        elseif v.name == "lua" then
-            if attributes.href then
-                table.insert(luaIncludes, attributes.href)
+    if root("head")[1] then
+        for i, v in pairs(root("head")[1].nodes) do
+            if v.name == "title" then
+                title = v:getcontent()
+            elseif v.name == "lua" then
+                if attributes.href then
+                    table.insert(luaIncludes, attributes.href)
+                end
+            elseif v.name == "style" then
+                table.insert(styles, v:getcontent())
             end
-        elseif v.name == "style" then
-            table.insert(styles, v:getcontent())
         end
     end
     return content, {
