@@ -44,7 +44,7 @@ local function renderNode(node, x, y)
             loadStyle(node.style)
             write(node.content)
             local eX, eY = term.getCursorPos()
-            return eX, eY, {
+            return 2, y + 1, {
                 startX = x,
                 y = y,
                 endX = eX,

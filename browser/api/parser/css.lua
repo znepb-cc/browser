@@ -2,6 +2,16 @@ local function removeWhitespace(str)
     return str:sub(#str:match(" *") + 1, #str - #str:match(" *$"))
 end
 
+local longCSS = [[
+    a {
+        color: blue;
+    }
+
+    p {
+        display: block;
+    }
+]]
+
 local function splitCSS(css)
     local split = {}
     for word in string.gmatch(css, ".-: .-;") do

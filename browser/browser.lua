@@ -1,5 +1,5 @@
 xpcall(function()
-    _G.currentPage = "internal://pages/test.html"
+    _G.currentPage = "internal://pages/main.html"
 
     local parser = require(".browser.api.parser")
     local renderer = require(".browser.api.renderer")
@@ -23,7 +23,7 @@ xpcall(function()
                 local data = file.readAll()
                 file.close()
                 local root = parser:parseHTML(data)
-                table.insert(history["pages"], currentPage:sub(12, #currentPage))
+                table.insert(history["pages"], currentPage)
                 lua:init(root)
 
                 if history["position"] > 0 then
@@ -33,7 +33,7 @@ xpcall(function()
 
                 return root
             else
-                local file = fs.open("/browser/pages/404.html", "r")
+                local file = fs.open("/browser/pages/errors/404.html", "r")
                 local data = file.readAll()
                 file.close()
                 local root = parser:parseHTML(data)
@@ -41,27 +41,56 @@ xpcall(function()
                 return root
             end
         elseif currentPage:find("http://") == 1 or currentPage:find("https://") == 1 then
-            local file = http.get(currentPage, {
+            local file, err, errorHandle = http.get(currentPage, {
                 [ "User-Agent" ] = "CC-Web 1.0"
               })
-            local data = file.readAll()
-            file.close()
-            local root = parser:parseHTML(data)
-            lua:init(root)
+            if not file then
+                if not errorHandle then
+                    local root = parser:parseHTML([[<html>
+    <body>
+        <p>Undetermined error. Check the URL, and then try again.</p>
+    </body>
+</html>]])
+                    return root
+                else
+                    if fs.exists("/browser/pages/errors/" .. errorHandle.getResponseCode() .. ".html") then
+                        local file = fs.open("/browser/pages/errors/" .. errorHandle.getResponseCode() .. ".html", "r")
+                        local data = file.readAll()
+                        file.close()
+                        local root = parser:parseHTML(data)
+                        lua:init(root)
+                        return root
+                    else
+                        ccemux.echo(errorHandle.read())
+                        local code, ret = errorHandle.getResponseCode()
+                        ccemux.echo(tostring(code) .. " " .. tostring(ret))
+                        local root = parser:parseHTML([[<html>
+    <body>
+        <p>]] .. code .. [[ ]] .. ret .. [[</p>
+    </body>
+</html>]])
+                        return root
+                    end
+                end
+            else
+                local data = file.readAll()
+                file.close()
+                local root = parser:parseHTML(data)
+                lua:init(root)
 
-            local file = fs.open("testing.html", "w")
-            file.write(data)
+                local file = fs.open("testing.html", "w")
+                file.write(data)
 
-            file.close()
+                file.close()
 
-            table.insert(history["pages"], currentPage)
+                table.insert(history["pages"], currentPage)
 
-            if history["position"] > 0 then
-                table.remove(history, (#history["pages"] - (history["position"]+1)), #history["pages"])
-                history["position"] = 0
+                if history["position"] > 0 then
+                    table.remove(history, (#history["pages"] - (history["position"]+1)), #history["pages"])
+                    history["position"] = 0
+                end
+                return root
             end
-
-            return root
         elseif currentPage:find("file://") == 1 then
             ccemux.echo(currentPage:sub(8, #currentPage))
             if fs.exists(currentPage:sub(8, #currentPage)) then
@@ -72,7 +101,7 @@ xpcall(function()
                 local root = parser:parseHTML(data)
                 lua:init(root)
 
-                table.insert(history["pages"], currentPage:sub(8, #currentPage))
+                table.insert(history["pages"], currentPage)
 
                 if history["position"] > 0 then
                     table.remove(history, (#history["pages"] - (history["position"]+1)), #history["pages"])
@@ -81,7 +110,7 @@ xpcall(function()
 
                 return root
             else
-                local file = fs.open("/browser/pages/404.html", "r")
+                local file = fs.open("/browser/pages/errors/404.html", "r")
                 local data = file.readAll()
                 file.close()
                 local root = parser:parseHTML(data)
@@ -153,6 +182,12 @@ xpcall(function()
             end
         elseif e[1] == "browser_redraw" then
             links = renderer.render(_G.pageRoot)
+        elseif e[1] == "browser_log" then
+            if type(e[2]) == "string" then
+                ccemux.echo(e[2])
+            end
+        elseif e[1] == "browser_history" then
+            os.queueEvent("browser_history_rec", history)
         end
     end
 end, function(err)
