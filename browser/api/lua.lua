@@ -1,4 +1,20 @@
-local window = {
+local DOM = {}
+
+function DOM:newElement(element)
+    setmetatable(element, self)
+    self.__index = self
+    function self:setContent(content)
+        element.content = content
+        os.queueEvent("browser_redraw")
+    end
+    function self:appendContent(content)
+        element.content = element.content .. content
+        os.queueEvent("browser_redraw")
+    end
+    return element
+end
+
+local jsWindow = {
   alert = function(str)
     local w, h = term.getSize()
     local c, m = w/2, h/2
@@ -45,64 +61,46 @@ local window = {
     os.queueEvent("browser_history")
     local _, history = os.pullEvent("browser_history_rec")
     return history
-  end
-}
-
-local DOM = {}
-
-function DOM:newElement(element)
-    setmetatable(element, self)
-    self.__index = self
-    function self:setContent(content)
-        element.content = content
-        os.queueEvent("browser_redraw")
-    end
-    function self:write(content)
-        element.content = element.content .. content
-        os.queueEvent("browser_redraw")
-    end
-    return element
-end
-
-local document = {
-  getElementById = function(id)
-    ccemux.echo(textutils.serialise(_G.pageRoot))
-    local function find(tbl)
-        if type(tbl) == "table" then
-            for i, v in pairs(tbl) do
-                if v.id and v.id == id then
-                    return v
-                elseif v.nodes then
-                    find(v.nodes)
-                end
-            end
-        end
-    end
-    print(find(_G.pageRoot))
-    local elem = DOM:newElement(find(_G.pageRoot))
-    return elem
-    --[[
-        document.querySelector('#id')
-        document.querySelector('.class')
-        document.querySelector('tag')
-        document.querySelector('tag[attribute]')
-
-        change content
-            -> soft reload
-    ]]
-  end
+  end,
+  document = {
+    getElementById = function(id)
+      ccemux.echo(textutils.serialise(_G.pageRoot))
+      local function find(tbl)
+          if type(tbl) == "table" then
+              for i, v in pairs(tbl) do
+                  if v.id and v.id == id then
+                      return v
+                  elseif v.nodes then
+                      find(v.nodes)
+                  end
+              end
+          end
+      end
+      print(find(_G.pageRoot))
+      local elem = DOM:newElement(find(_G.pageRoot))
+      return elem
+      --[[
+          document.querySelector('#id')
+          document.querySelector('.class')
+          document.querySelector('tag')
+          document.querySelector('tag[attribute]')
+  
+          change content
+              -> soft reload
+      ]]
+  },
+  pageRoot = _G.pageRoot
 }
 
 local lua = {}
 
 function lua:execute(code)
-    load(code, "=lua", "t", {
-        window = window, document = document, pageRoot = _G.pageRoot
-    })()
+    load(code, "=lua", "t", jsWindow)()
 end
 
 function lua:init(root)
     _G.pageRoot = root
+    jsWindow.pageRoot = root
     ccemux.echo(textutils.serialise(root))
     local function findScripts(tbl)
         for i, v in pairs(tbl) do
@@ -120,6 +118,9 @@ function lua:init(root)
     end
 
     findScripts(root)
+    if head then
+            
+    end
 end
 
 return lua

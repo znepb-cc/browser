@@ -22,9 +22,9 @@ xpcall(function()
                 local file = fs.open("/browser/" .. currentPage:sub(12, #currentPage), "r")
                 local data = file.readAll()
                 file.close()
-                local root = parser:parseHTML(data)
+                local root, head = parser:parseHTML(data)
                 table.insert(history["pages"], currentPage)
-                lua:init(root)
+                lua:init(root, head)
 
                 if history["position"] > 0 then
                     table.remove(history, (#history["pages"] - (history["position"]+1)), #history["pages"])
