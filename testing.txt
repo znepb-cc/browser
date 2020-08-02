@@ -1,0 +1,158 @@
+{
+  classes = {},
+  name = "body",
+  style = {},
+  content = {
+    {
+      i = 1,
+      name = "h2",
+      style = {},
+      classes = {},
+      content = {
+        "Welcome",
+      },
+      attributes = {},
+    },
+    {
+      i = 2,
+      name = "p",
+      style = {},
+      classes = {},
+      content = {
+        "Hello World!",
+      },
+      attributes = {},
+    },
+    {
+      i = 3,
+      name = "br",
+      style = {},
+      classes = {},
+      content = {
+        " ",
+      },
+      attributes = {},
+    },
+    {
+      i = 4,
+      name = "p",
+      style = {},
+      classes = {},
+      content = {
+        "Welcome to the CC browser, developed by znepb. ",
+        {
+          i = 1,
+          name = "strong",
+          style = {},
+          classes = {},
+          content = {
+            "Notice:",
+          },
+          attributes = {},
+        },
+        " This is currently an early version!",
+      },
+      attributes = {},
+    },
+    {
+      i = 5,
+      name = "br",
+      style = {},
+      classes = {},
+      content = {
+        " ",
+      },
+      attributes = {},
+    },
+    {
+      i = 6,
+      name = "a",
+      style = {},
+      classes = {},
+      content = {
+        "Changelog",
+      },
+      attributes = {
+        href = "internal://pages/changelog.html",
+      },
+    },
+    {
+      i = 7,
+      name = "br",
+      style = {},
+      classes = {},
+      content = {
+        "",
+      },
+      attributes = {},
+    },
+    {
+      i = 8,
+      name = "a",
+      style = {},
+      classes = {},
+      content = {
+        "Credits",
+      },
+      attributes = {
+        href = "internal://pages/credits.html",
+      },
+    },
+    {
+      i = 9,
+      name = "br",
+      style = {},
+      classes = {},
+      content = {
+        "",
+      },
+      attributes = {},
+    },
+    {
+      i = 10,
+      name = "a",
+      style = {},
+      classes = {},
+      content = {
+        "Browser History",
+      },
+      attributes = {
+        href = "internal://pages/history.html",
+      },
+    },
+    {
+      i = 11,
+      name = "br",
+      style = {},
+      classes = {},
+      content = {
+        "",
+      },
+      attributes = {},
+    },
+    {
+      i = 12,
+      name = "a",
+      style = {},
+      classes = {},
+      content = {
+        "Go to test page",
+      },
+      attributes = {
+        href = "internal://pages/test.html",
+      },
+    },
+    {
+      i = 13,
+      name = "br",
+      style = {},
+      classes = {},
+      content = {
+        "",
+      },
+      attributes = {},
+    },
+    "  ",
+  },
+  attributes = {},
+}

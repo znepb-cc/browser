@@ -18,7 +18,7 @@ local jsWindow = {
   alert = function(str)
     local w, h = term.getSize()
     local c, m = w/2, h/2
-    local closeButtonStr = " OK "
+    local closeButtonStr = " Click anywhere to close "
     paintutils.drawFilledBox(1, m-2, w, m+2, colors.gray)
     term.setTextColor(colors.white)
     term.setCursorPos(2, m-1)
@@ -26,15 +26,10 @@ local jsWindow = {
     term.setCursorPos(3, m)
     term.write(str)
     term.setCursorPos((w-#closeButtonStr), m+1)
-    term.setBackgroundColor(colors.blue)
+    term.setBackgroundColor(colors.red)
     term.write(closeButtonStr)
-    while true do
-      local e, x, y = os.pullEvent('mouse_click')
-      if y == m+1 and x >= (w-#closeButtonStr) and x <= w-1 then
-        os.queueEvent("browser_redraw")
-        break
-      end
-    end
+    os.pullEvent("mouse_click")
+    os.queueEvent("browser_redraw")
   end,
   prompt = function(str)
     local w, h = term.getSize()
@@ -52,9 +47,44 @@ local jsWindow = {
     os.queueEvent("browser_redraw")
     return text
   end,
+  confirm = function(str)
+    local w, h = term.getSize()
+    local c, m = w/2, h/2
+    paintutils.drawFilledBox(1, m-2, w, m+2, colors.gray)
+    term.setTextColor(colors.white)
+    term.setCursorPos(2, m-1)
+    term.write(_G.currentPage .. " asks:")
+    term.setCursorPos(3, m)
+    term.write(str)
+    term.setCursorPos(w-4, m+1)
+    term.write("y/n")
+    local state = false
+    while true do
+        local e, k = os.pullEvent("char")
+        if k:lower() == "y" then
+            state = true
+            term.setCursorPos(w-4, m+1)
+            term.setBackgroundColor(colors.green)
+            term.write(" y ")
+            break
+        elseif k:lower() == "n" then
+            state = false
+            term.setCursorPos(w-4, m+1)
+            term.setBackgroundColor(colors.red)
+            term.write(" n ")
+            break
+        end
+    end
+    sleep(1)
+    os.queueEvent("browser_redraw")
+    return state
+  end,
   console = {
     log = function(str)
         os.queueEvent("browser_log", getfenv())
+    end,
+    error = function(str)
+        os.queueEvent("browser_log_error", getfenv())
     end
   },
   getHistory = function()
@@ -62,9 +92,14 @@ local jsWindow = {
     local _, history = os.pullEvent("browser_history_rec")
     return history
   end,
+  location = {
+    href = _G.currentPage,
+    reload = function()
+        os.queueEvent("browser_redraw")
+    end
+  },
   document = {
     getElementById = function(id)
-      ccemux.echo(textutils.serialise(_G.pageRoot))
       local function find(tbl)
           if type(tbl) == "table" then
               for i, v in pairs(tbl) do
@@ -90,6 +125,9 @@ local jsWindow = {
       ]]
     end
   },
+  sleep = function(msec)
+    sleep(msec / 1000)
+  end,
   pageRoot = _G.pageRoot
 }
 
@@ -102,7 +140,6 @@ end
 function lua:init(root)
     _G.pageRoot = root
     jsWindow.pageRoot = root
-    ccemux.echo(textutils.serialise(root))
     local function findScripts(tbl)
         for i, v in pairs(tbl) do
             if type(v) == "table" then

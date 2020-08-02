@@ -27,9 +27,7 @@ local function resolve(path)
                     file.close()
                     return data
                 else
-                    ccemux.echo(errorHandle.read())
                     local code, ret = errorHandle.getResponseCode()
-                    ccemux.echo(tostring(code) .. " " .. tostring(ret))
                     return nil, {
                         ErrorCode = code,
                         ErrorName = ret
@@ -43,7 +41,6 @@ local function resolve(path)
             return data
         end
     elseif path:find("file://") == 1 then
-        ccemux.echo(currentPage:sub(8, #currentPage))
         if fs.exists(currentPage:sub(8, #currentPage)) then
             local file = fs.open(currentPage:sub(8, #currentPage), "r")
             local data = file.readAll()
@@ -64,4 +61,4 @@ local function resolve(path)
     end
 end
 
-return get
+return resolve

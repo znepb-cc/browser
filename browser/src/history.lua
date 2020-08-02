@@ -1,4 +1,6 @@
-local history = document.getElementById("history").pages
+local history = getHistory().pages
+local historyContent = document.getElementById("history")
 for i, v in pairs(history) do 
-    history:appendContent('<p><a href="' .. v .. '">' .. v .. '</a></p>')
+    console.log(v)
+    historyContent:appendContent('<p><a href="' .. v .. '">' .. v .. '</a></p>')
 end

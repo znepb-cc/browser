@@ -1,0 +1,36 @@
+* {
+    color: gray;
+    font-size: medium;
+    display: inline;
+}
+
+br {
+    display: block;
+}
+
+lua {
+    display: none;
+}
+
+p {
+    display: block;
+}
+
+a {
+    display: inline;
+    color: blue;
+}
+
+h2 {
+    font-size: large;
+    display: block;
+    color: black;
+}
+
+strong {
+    color: black;
+}
+
+script {
+    display: none;
+}

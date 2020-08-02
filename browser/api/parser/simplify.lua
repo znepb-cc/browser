@@ -1,102 +1,123 @@
 local css = require(".browser.api.parser.css")
-for i, v in pairs(css("color: red; background-color: light-blue;")) do
-    print(i, v)
-end
 
---HAIHAIHAI yo wassu
-local function parseNode(node)
-    local output
-    local ok, err = pcall(function()
-        local content = node:getcontent()
-        local nodes = node.nodes
-
-        if #nodes > 0 then
-            output = {
-                name = node.name,
-                classes = node.classes,
-                attributes = node.attributes,
-                id = node.id,
-                nodes = {}
-            }
-            for i, v in pairs(nodes) do
-                local openstart = v._openstart - node._openstart - 3
-                local closeend = v._closeend - node._openstart - 1
-
-                local preContent = content:sub(1, openstart)
-                local postContent = content:sub(closeend, content:len())
-
-                table.insert(output.nodes, {
-                    name = "",
-                    content = preContent,
-                })
-                table.insert(output.nodes, parseNode(v))
-                table.insert(output.nodes, {
-                    name = "",
-                    content = postContent
-                })
-            end
-        else
-            local style
-            if node.attributes.style then
-                style = css(node.attributes.style)
-            end
-
-            output = {
-                name = node.name,
-                content = content,
-                classes = node.classes,
-                style = style,
-                attributes = node.attributes,
-                id = node.id
-            }
-        end
-    end)
-    if not ok then
-        return nil, err
-    else
-        return output
-    end
-end
-  
-local function parseRoot(root)
-    local content = {}
-    local rootElements = {}
-    if root("body")[1] then
-        rootElements = root("body")[1].nodes
-    else
-        rootElements = root.nodes
-    end
-    for i, v in pairs(rootElements) do
-        local data, err = parseNode(v)
-        if not data then
-            return {
-                {
-                    ["name"] = "p",
-                    ["content"] = "Parse error: " .. err
-                }
-            }
-        end
-        table.insert(content, data)
-    end
-    local title, luaIncludes, styles = nil, {}, {}
-    if root("head")[1] then
-        for i, v in pairs(root("head")[1].nodes) do
-            if v.name == "title" then
-                title = v:getcontent()
-            elseif v.name == "lua" then
-                if attributes.href then
-                    table.insert(luaIncludes, attributes.href)
-                end
-            elseif v.name == "style" then
-                table.insert(styles, v:getcontent())
-            end
-        end
-    end
-    return content, {
-        title = title,
-        luaIncludes = {},
-        styles = {}
+local function constructNode(node, index)
+    return {
+        name = node.name,
+        attributes = node.attributes,
+        style = {},
+        id = node.id,
+        i = index,
+        classes = node.classes,
+        content = {}
     }
 end
-  
+
+local function getText(node)
+    local notags = node:getcontent()
+    for _, parent in pairs(node.nodes) do
+        notags = notags:gsub(parent:gettext(), " ")
+    end
+    return notags
+end
+
+local function removeWhitespace(str)
+    local r = str:gsub("[\t\n]", "")
+    return r
+end
+
+local function isJustWhitspace(str)
+    if str:gsub("[%s\t\n]", "") == "" then
+        return true  
+    end
+    return false
+end
+
+local function parseRoot(root)
+    local output = {}
+    local head = root("head")[1]
+    local body = root("body")[1] or root()
+
+    local text = body:getcontent()
+    local file = fs.open("out.txt", "w")
+    file.write(text)
+    file.close()
+
+    local output = {}
+    --where is the lua script code
+    --lua.lua
+
+    local function constructElements(node, index)
+        local content = {}
+
+        for i, v in pairs(node.nodes) do
+            table.insert(content, constructElements(v, i))
+        end
+
+        if not node:getcontent():find("[<>]") then
+            table.insert(content, node:getcontent())
+        else
+            local discoveredText = {}
+            local pos = node._openend
+            local rootContent = body.root:gettext()
+            for i, v in pairs(node.nodes) do
+                local content = rootContent:sub(pos + 1, v._openstart - 1)
+                if isJustWhitspace(content) == false then
+                    table.insert(discoveredText, i, removeWhitespace(content))
+                end
+                
+                pos = v._closeend + 1
+            end
+            if rootContent:sub(pos - 1, pos) ~= "<" then
+                table.insert(discoveredText, #node.nodes + #discoveredText + 1, removeWhitespace(rootContent:sub(pos, node._closestart - 1)))
+            end
+
+            for i, v in pairs(discoveredText) do
+                table.insert(content, i, v)
+            end
+        end
+
+        local output = constructNode(node, index)
+        output.content = content
+
+        return output
+    end
+
+    output = constructElements(body)
+    
+
+    --for i, v in pairs()
+
+    --[[--
+    {
+        head = {
+            header stuff...
+        },
+        body = {
+            "text",
+            {
+                name = "p",
+                attributes = {},
+                style = {},
+                iif = "content",
+                content = {
+                    "Hello there! This is a ",
+                    {
+                        name = "strong",
+                        attributes = {},
+                        style = {},
+                        id = "",
+                        content = {"test!"}
+                    }
+                }
+            }
+        }
+    }
+    --]]--
+
+    --ccemux.echo(textutils.serialise(output))
+
+    return output
+end
+
+
 return parseRoot
