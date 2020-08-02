@@ -38,9 +38,6 @@ local function parseRoot(root)
     local body = root("body")[1] or root()
 
     local text = body:getcontent()
-    local file = fs.open("out.txt", "w")
-    file.write(text)
-    file.close()
 
     local output = {}
     --where is the lua script code
