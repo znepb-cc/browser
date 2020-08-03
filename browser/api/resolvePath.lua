@@ -1,7 +1,7 @@
 local function resolve(path)
     if path:find("internal://") == 1 then
-        if fs.exists("/browser/" .. path:sub(12, #path)) then
-            local file = fs.open("/browser/" .. path:sub(12, #path), "r")
+        if fs.exists("/browser" .. path:sub(12, #path)) then
+            local file = fs.open("/browser" .. path:sub(12, #path), "r")
             local data = file.readAll()
             file.close()
 

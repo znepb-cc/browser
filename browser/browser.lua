@@ -1,5 +1,5 @@
 xpcall(function()
-    _G.currentPage = "internal://pages/main.html"
+    _G.currentPage = "internal:///pages/main.html"
 
     local parser = require(".browser.api.parser")
     local renderer = require(".browser.api.renderer")
@@ -66,7 +66,19 @@ xpcall(function()
                 else
                     for i, v in pairs(links) do
                         if x >= v.startX and x <= v.endX and y == v.y then
-                            _G.currentPage = v.href
+                            if v.href:sub(1, 1) == "/" then  
+                                if _G.currentPage:find("http://") == 1 or _G.currentPage:find("https://") == 1 then
+                                    local protocol, domain, path = _G.currentPage:match("(.*)://([^/]+)(/.*)")
+                                    ccemux.echo(tostring(protocol) .. "://" .. tostring(domain) .. v.href)
+                                    _G.currentPage = protocol .. "://" .. domain .. v.href:sub(2)
+                                elseif _G.currentPage:find("internal://") == 1 or _G.currentPage:find("file://") == 1 then
+                                    local protocol = _G.currentPage:match("(.*)://(/.*)")
+                                    ccemux.echo(tostring(protocol) .. "://" .. v.href)
+                                    _G.currentPage = protocol .. "://" .. v.href
+                                end
+                            else
+                                _G.currentPage = v.href
+                            end
                             renderer.renderTop()
                             links = renderer.render(loadCurrentPage())
                         end

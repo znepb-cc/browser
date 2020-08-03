@@ -40,8 +40,6 @@ local function parseRoot(root)
     local text = body:getcontent()
 
     local output = {}
-    --where is the lua script code
-    --lua.lua
 
     local function constructElements(node, index)
         local content = {}
